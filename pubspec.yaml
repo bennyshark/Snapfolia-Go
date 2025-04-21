@@ -41,6 +41,7 @@ dependencies:
   image: ^4.0.0
   path_provider: ^2.0.11
   path: ^1.8.2
+  carousel_slider: ^5.0.0
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +69,7 @@ flutter:
   assets:
     - assets/labels36class.txt
     - assets/best36.tflite
+    - assets/images/
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
