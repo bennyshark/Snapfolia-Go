@@ -4,6 +4,7 @@ import 'dart:async';
 import '../models/obj_detection.dart';
 
 void main() async {
+
   WidgetsFlutterBinding.ensureInitialized();
   final cameras = await availableCameras();
   runApp(MaterialApp(
@@ -22,7 +23,7 @@ class ScanPage extends StatefulWidget {
   State<ScanPage> createState() => _ScanPageState();
 }
 
-class _ScanPageState extends State<ScanPage> {
+class _ScanPageState extends State<ScanPage> with WidgetsBindingObserver {
   late CameraController cameraController;
   late ObjectDetectionModel detectionModel;
 
@@ -41,7 +42,22 @@ class _ScanPageState extends State<ScanPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     initializeCamera();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // Stop detection when app goes to background
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
+      if (isDetecting) {
+        _resetToDefaultState();
+      }
+    }
   }
 
   Future<void> initializeCamera() async {
@@ -108,18 +124,69 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   void stopDetection() async {
-    if (!mounted) return;
+    try {
+      if (!mounted) return;
 
-    _detectionTimer?.cancel();
-    _detectionTimer = null;
+      _detectionTimer?.cancel();
+      _detectionTimer = null;
 
-    setState(() {
-      isDetecting = false;
-      detectionResults.clear();
-    });
+      setState(() {
+        isDetecting = false;
+        detectionResults.clear();
+        _isProcessing = false;
+      });
 
-    if (cameraController.value.isStreamingImages) {
-      await cameraController.stopImageStream();
+      if (cameraController.value.isInitialized && cameraController.value.isStreamingImages) {
+        await cameraController.stopImageStream();
+      }
+
+      // Clear camera image reference
+      cameraImage = null;
+
+    } catch (e) {
+      print('Stop detection error: $e');
+    }
+  }
+
+  // Handle back button press
+  Future<bool> _onWillPop() async {
+    await _resetToDefaultState();
+    return true; // Allow navigation to proceed
+  }
+
+  // Reset everything to default state before navigation
+  Future<void> _resetToDefaultState() async {
+    try {
+      // Stop detection first
+      if (isDetecting) {
+        setState(() {
+          isDetecting = false;
+        });
+      }
+
+      // Cancel timers
+      _detectionTimer?.cancel();
+      _detectionTimer = null;
+
+      // Stop camera image stream
+      if (cameraController.value.isInitialized && cameraController.value.isStreamingImages) {
+        await cameraController.stopImageStream();
+      }
+
+      // Clear all detection data
+      setState(() {
+        detectionResults.clear();
+        cameraImage = null;
+        _isProcessing = false;
+        _lastDetectionTime = DateTime.now();
+      });
+
+      // Give time for all async operations to complete
+      await Future.delayed(const Duration(milliseconds: 300));
+
+    } catch (e) {
+      // Ignore errors during cleanup to prevent further crashes
+      print('Cleanup error: $e');
     }
   }
 
@@ -136,6 +203,12 @@ class _ScanPageState extends State<ScanPage> {
       double objectHeight = (result['box'][3] - result['box'][1]) * factorY;
       double confidence = result['box'][4];
 
+      // Clean the tag to remove class ID if present (e.g., "30: Human" -> "Human")
+      String tag = result['tag'];
+      if (tag.contains(': ')) {
+        tag = tag.split(': ')[1];
+      }
+
       return Positioned(
         left: objectX,
         top: objectY,
@@ -144,13 +217,13 @@ class _ScanPageState extends State<ScanPage> {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10.0),
-            border: Border.all(color: Colors.pink, width: 2.0),
+            border: Border.all(color: Colors.black, width: 3.0),
           ),
           child: Text(
-            "${result['tag']} ${(confidence * 100).toStringAsFixed(1)}%",
-            style: const TextStyle(
-              backgroundColor: Colors.green,
-              color: Colors.white,
+            "$tag ${(confidence * 100).toStringAsFixed(1)}%",
+            style: TextStyle(
+              backgroundColor: Colors.black.withOpacity(.6),
+              color: Colors.green,
               fontSize: 16.0,
               fontWeight: FontWeight.bold,
             ),
@@ -163,7 +236,7 @@ class _ScanPageState extends State<ScanPage> {
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-
+    const Color primaryGreen = Color(0xFF1E5434);
     if (!isLoaded) {
       return Scaffold(
         body: Center(
@@ -180,70 +253,129 @@ class _ScanPageState extends State<ScanPage> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black26.withOpacity(.5),
-        title: Text("Snapfolia Go"),
-      ),
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          CameraPreview(cameraController),
-          ...displayBoundingBoxes(screenSize),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                height: 80,
-                width: 80,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    width: 5,
-                    color: Colors.white,
-                    style: BorderStyle.solid,
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: primaryGreen,
+          title:  Row(
+            children: [
+              Image.asset(
+                'assets/images/leaf_icon.png',
+                width: 32,
+                height: 32,
+                errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.eco, color: Colors.white, size: 32),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Snapfolia',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Montserrat',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 22,
+                ),
+              ),
+              Text(
+                'GO',
+                style: TextStyle(
+                  color: Colors.lightGreenAccent,
+                  fontFamily: 'Montserrat',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                ),
+              ),
+            ],
+          ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () async {
+              await _resetToDefaultState();
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            CameraPreview(cameraController),
+            ...displayBoundingBoxes(screenSize),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  height: 80,
+                  width: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      width: 5,
+                      color: Colors.white,
+                      style: BorderStyle.solid,
+                    ),
+                  ),
+                  child: isDetecting
+                      ? IconButton(
+                    onPressed: stopDetection,
+                    icon: const Icon(Icons.stop, color: Colors.red),
+                    iconSize: 50,
+                  )
+                      : IconButton(
+                    onPressed: startDetection,
+                    icon: const Icon(Icons.play_arrow, color: Color(0xFF1E5434),),
+                    iconSize: 50,
                   ),
                 ),
-                child: isDetecting
-                    ? IconButton(
-                  onPressed: stopDetection,
-                  icon: const Icon(Icons.stop, color: Colors.red),
-                  iconSize: 50,
-                )
-                    : IconButton(
-                  onPressed: startDetection,
-                  icon: const Icon(Icons.play_arrow, color: Colors.white),
-                  iconSize: 50,
+              ),
+            ),
+            Positioned(
+              top: 20,
+              right: 20,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  isDetecting ? "Detection Active" : "Detection Paused",
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            top: 20,
-            right: 20,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                isDetecting ? "Detection Active" : "Detection Paused",
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   @override
   void dispose() {
-    _detectionTimer?.cancel();
-    cameraController.dispose();
-    detectionModel.dispose();
+    try {
+      WidgetsBinding.instance.removeObserver(this);
+      _detectionTimer?.cancel();
+      _detectionTimer = null;
+
+      // Stop detection and clear state
+      isDetecting = false;
+      _isProcessing = false;
+      detectionResults.clear();
+      cameraImage = null;
+
+      // Dispose camera and model
+      if (cameraController.value.isInitialized) {
+        if (cameraController.value.isStreamingImages) {
+          cameraController.stopImageStream();
+        }
+        cameraController.dispose();
+      }
+
+      detectionModel.dispose();
+    } catch (e) {
+      print('Dispose error: $e');
+    }
     super.dispose();
   }
 }

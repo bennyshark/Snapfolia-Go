@@ -13,7 +13,7 @@ class LeafInfo extends StatelessWidget {
     final screenHeight = mediaQuery.size.height;
 
     return Card(
-      color: Color(0xff282828),
+      color: Colors.white,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -27,7 +27,7 @@ class LeafInfo extends StatelessWidget {
             name,
             style: TextStyle(
               fontSize: screenWidth * 0.037, // 5% of screen width
-              color: Colors.white,
+              color: Colors.black,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
