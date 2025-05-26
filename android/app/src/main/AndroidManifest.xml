@@ -2,7 +2,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
-        android:label="snapfolia_go_v4"
+        android:label="Snapfolia Go"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
