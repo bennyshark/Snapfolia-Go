@@ -52,17 +52,6 @@ Wood: Cultivated for its red wood. Heartwood is medium-red brown to dark red. He
 \nMedicinal: Plant exudate and bark are used medicinally.'''
   },
   {
-    'name': 'Antipolo',
-    'scientificName': 'Artocarpus blancoi',
-    'location': 'Batangas Lake Lands',
-    'definition':
-    'The Antipolo tree (Artocarpus blancoi), a member of the Moraceae family, is a medium to large-sized tree that can grow up to 25 to 30 meters tall. It is native and endemic to the Philippines, commonly found in lowland primary and secondary forests. The tree is known for its large, leathery, ovate to oblong leaves that have a rough texture. Like other members of the Artocarpus genus, the Antipolo tree produces a milky latex sap. Its fruit is round to oval and resembles a small jackfruit; although edible, it is not widely consumed. The bark is grayish brown and is sometimes used in traditional medicine. Historically, the city of Antipolo in Rizal Province was named after this tree due to its abundance in the area',
-    'imageUrl': 'assets/images/antipolo.jpg',
-    'uses': '''
-Wood: valued for light construction, furniture making, and wood carving due to its workable quality.
-\nMedicinal:  In traditional Philippine medicine, its bark and leaves have been used in folk remedies, often prepared as decoctions to treat various ailments. Although the fruit is edible, it is not commonly consumed as food.'''
-  },
-  {
     'name': 'Apitong',
     'scientificName': 'Dipterocarpus grandiflorus',
     'location': 'FAITH Colleges & Batangas Lake Lands',
@@ -261,19 +250,6 @@ Fruit: Eaten raw or used in drinks, ice cream, and jelly.
 \nSeeds and Green Fruit: Astringent properties.'''
   },
   {
-    'name': 'Hinadyong',
-    'scientificName': 'Trema orientalis',
-    'location': 'Batangas Lake Lands',
-    'definition':
-      'Hanadiong or Anabiong has elongated branches and lanceolate leaves. Dense hairy cymes bear many white flowers and ovoid fruits. Found in thickets and second-growth forests across the Philippines.',
-    'imageUrl': 'assets/images/hinadyong.jpg',
-    'uses': '''
-Tannin: Used for coloring and roughening fishing lines.
-\nFodder: Leaves, pods, and seeds for cattle, goats, and water buffalo.
-\nWood: Coppiced for firewood and charcoal.
-\nFiber: Suitable for paper and pulp due to good tensile strength.'''
-  },
-  {
     'name': 'Ilang-Ilang',
     'scientificName': 'Cananga odorata',
     'location': 'FAITH Colleges',
@@ -284,17 +260,6 @@ Tannin: Used for coloring and roughening fishing lines.
 Oil: Flavoring agent for beverages, ice cream, candies, and baked goods.
 \nMedicinal: Treats infectious skin diseases, acne, and scalp conditions.
 \nAromatherapy: Acts as a sedative and antidepressant.'''
-  },
-  {
-    'name': 'Inyam',
-    'scientificName': 'Antidesma ghaesembilla',
-    'location': 'Batangas Lake Lands',
-    'definition':
-      'Also known as the Black Currant Tree, Inyam has a thick trunk and simple, alternate leaves. Fruits are small greenish-yellow drupes in clusters. Harvested from the wild for food and medicine.',
-    'imageUrl': 'assets/images/inyam.jpg',
-    'uses': '''
-Fruit: Eaten raw, cooked, pickled, or made into jams and jellies.
-\nResin (Nyatang): Burned to make black dye for sunhats in East Kalimantan.'''
   },
   {
     'name': 'Ipil',
@@ -469,18 +434,6 @@ Seeds are edible; oil used for lighting and medicine.
 \nFodder: Leaves are used as feed for silkworms and other animals.
 \nWood: The tree provides high-quality timber used in construction for boats, bridges, crates, planks, and water troughs.
 \nGum or resin: The trunk yields a gum that has various applications.
-'''
-},
-{
-  'name': 'Santol',
-  'scientificName': 'Sandoricum koetjape',
-  'location': 'Batangas Lake Lands',
-  'definition': 'The Santol tree belongs to the Meliaceae family and can grow up to 30 meters tall in favorable conditions. Santol produces a round, yellowish-green fruit that has a thick, fleshy rind and a sweet-to-sour pulp surrounding the seeds.',
-  'imageUrl': 'assets/images/santol.jpg',
-  'uses': '''
-\nThe Santol fruit is eaten fresh or used in various dishes, including jams, jellies, and desserts.
-\nThe bark, leaves, and roots have been used in traditional medicine.
-\nThey are believed to have anti-inflammatory, astringent, and tonic properties.
 '''
 },
 {
